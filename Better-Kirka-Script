@@ -2,6 +2,7 @@ class Store {
     constructor(config) {
         this.config = JSON.parse(config);
     }
+
     get = (key) => this.config[key];
     set = (key, value) => {
         this.config[key] = value;
@@ -235,7 +236,9 @@ new MutationObserver(mutationRecords => {
 
                         try {
                             navigator.clipboard.writeText(JSON.stringify(gameSettingsObj));
-                        } catch { throw new Error("Copying to clipboard failed") }
+                        } catch {
+                            throw new Error("Copying to clipboard failed")
+                        }
                         //clipboard.writeText(JSON.stringify(gameSettingsObj));
                     }
 
@@ -290,7 +293,7 @@ new MutationObserver(mutationRecords => {
         });
     } catch {
     }
-}).observe(document, { childList: true, subtree: true });
+}).observe(document, {childList: true, subtree: true});
 
 
 let oldLog = console.log;
@@ -303,409 +306,406 @@ console.log = (...arguments) => {
 };
 
 
-document.addEventListener("DOMContentLoaded", () => {
+if (customCss) {
+    let cssLinkElem = document.createElement("link");
+    cssLinkElem.href = settings.get('cssLink');
+    cssLinkElem.rel = "stylesheet";
+    document.head.append(cssLinkElem);
+}
 
-    if (customCss) {
-        let cssLinkElem = document.createElement("link");
-        cssLinkElem.href = settings.get('cssLink');
-        cssLinkElem.rel = "stylesheet";
-        document.head.append(cssLinkElem);
+gui.id = "gui";
+
+gui.innerHTML += "<style>\n" +
+    "        @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap');\n" +
+    "\n" +
+    "        #gui {\n" +
+    "            background-color: rgb(24, 25, 28);\n" +
+    "            border: solid rgb(24, 25, 28) 5px;\n" +
+    "            box-shadow: 0 0 8px 2px #000000;\n" +
+    "            position: absolute;\n" +
+    "            left: 200px;\n" +
+    "            top: 100px;\n" +
+    "            z-index: 300;\n" +
+    "            color: rgb(255, 255, 255);\n" +
+    "            padding: 6px;\n" +
+    "            font-family: \"Titillium Web\", serif;\n" +
+    "            line-height: 1.6;\n" +
+    "            border-radius: 3px\n" +
+    "        }\n" +
+    "\n" +
+    "        input:disabled {\n" +
+    "            background: rgb(255, 255, 255);\n" +
+    "            border: solid rgb(0, 0, 0) 1px;\n" +
+    "            width: 50px;\n" +
+    "        }\n" +
+    "\n" +
+    "        .heading {\n" +
+    "            width: 300px;\n" +
+    "            height: 40px;\n" +
+    "            display: flex;\n" +
+    "            justify-content: center;\n" +
+    "            align-items: center;\n" +
+    "            background-color: rgb(24, 25, 28);\n" +
+    "            margin: -9px -6px 8px;\n" +
+    "            font-family: \"Titillium Web\", serif;\n" +
+    "            font-weight: bold;\n" +
+    "            text-align: center;\n" +
+    "            font-size: 24px;\n" +
+    "            border-bottom: solid rgb(140, 140, 140) 2px;\n" +
+    "        }\n" +
+    "\n" +
+    "        .footer {\n" +
+    "            width: 300px;\n" +
+    "            height: 20px;\n" +
+    "            display: flex;\n" +
+    "            justify-content: center;\n" +
+    "            align-items: center;\n" +
+    "            background-color: rgb(24, 25, 28);\n" +
+    "            margin: 6px -6px -10px;\n" +
+    "            font-family: \"Titillium Web\", serif;\n" +
+    "            font-weight: bold;\n" +
+    "            text-align: center;\n" +
+    "            font-size: 11px;\n" +
+    "            position: relative;\n" +
+    "            border-top: solid rgb(140, 140, 140) 2px;\n" +
+    "        }\n" +
+    "\n" +
+    "        .module:hover {\n" +
+    "            background-color: rgb(0, 0, 0, 0.1)\n" +
+    "        }\n" +
+    "\n" +
+    "        .autojoin{\n" +
+    "            display: none;\n" +
+    "        }\n" +
+    "\n" +
+    "    </style>\n" +
+    "    <div id=\"infi\" class=\"heading\">Script Settings</div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"crosshair\" name=\"crosshair\">\n" +
+    "        <label for=\"crosshair\">Perm. Crosshair</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"customCSS\" name=\"customCSS\">\n" +
+    "        <label for=\"customCSS\">CSS Link: </label>\n" +
+    "        <input type=\"text\" id=\"cssLink\" placeholder=\"Paste CSS Link Here\">\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"hideweap\" name=\"hideweap\">\n" +
+    "        <label for=\"hideweap\">Hide Weapon ADS</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"arms\" name=\"arms\">\n" +
+    "        <label for=\"arms\">Hide Arms</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"highlight\" name=\"highlight\">\n" +
+    "        <label for=\"highlight\">Highlight Players</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"black\" name=\"black\">\n" +
+    "        <label for=\"black\">Black Players</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"wireframeWeapons\" name=\"wireframeWeapons\">\n" +
+    "        <label for=\"wireframeWeapons\">Wireframe Weapons</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"wireframeArms\" name=\"wireframeArms\">\n" +
+    "        <label for=\"wireframeArms\">Wireframe Arms</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"rainbow\" name=\"rainbow\">\n" +
+    "        <label for=\"rainbow\">Rainbow Colors</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        Inspect Key\n" +
+    "        <button id=\"bindButton\" style=\"width: 100px\">click to bind</button>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"adspower\" name=\"adspower\">\n" +
+    "        <label for=\"adspower\">0 ADS Power</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"autoJoin\" name=\"autoJoin\">\n" +
+    "        <label for=\"autoJoin\">Auto-Joiner (Key F8)</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <hr class=\"autojoin\">\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"euLobbies\" name=\"euLobbies\">\n" +
+    "        <label for=\"euLobbies\">EU Lobbies</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"naLobbies\" name=\"naLobbies\">\n" +
+    "        <label for=\"naLobbies\">NA Lobbies</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"asiaLobbies\" name=\"asiaLobbies\">\n" +
+    "        <label for=\"asiaLobbies\">ASIA Lobbies</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"ffaLobbies\" name=\"ffaLobbies\">\n" +
+    "        <label for=\"ffaLobbies\">FFA Lobbies</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"tdmLobbies\" name=\"tdmLobbies\">\n" +
+    "        <label for=\"tdmLobbies\">TDM Lobbies</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"parkourLobbies\" name=\"parkourLobbies\">\n" +
+    "        <label for=\"parkourLobbies\">PARKOUR Lobbies</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <label for=\"preferredFilter\">Prefered Filter:</label>\n" +
+    "        <select id=\"preferredFilter\" name=\"preferredFilter\">\n" +
+    "            <option value=\"Time\">Time</option>\n" +
+    "            <option value=\"Players\">Players</option>\n" +
+    "        </select>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"range\" id=\"minPlayers\" name=\"minPlayers\" min=\"0\" max=\"8\" value=\"0\" step=\"1\">\n" +
+    "        <label id=\"minPlayersLab\" for=\"minPlayers\">min. Players</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"range\" id=\"maxPlayers\" name=\"maxPlayers\" min=\"0\" max=\"8\" value=\"0\" step=\"1\">\n" +
+    "        <label id=\"maxPlayersLab\" for=\"maxPlayers\">max. Players</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"range\" id=\"minTimeLeft\" name=\"minTimeLeft\" min=\"0\" max=\"8\" value=\"0\" step=\"1\">\n" +
+    "        <label id=\"minTimeLeftLab\" for=\"minTimeLeft\">min. Time Left</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module autojoin\">\n" +
+    "        <input type=\"checkbox\" id=\"filterMaps\" name=\"filterMaps\">\n" +
+    "        <label for=\"filterMaps\">Map Filter: </label>\n" +
+    "        <input type=\"text\" id=\"mapFilterField\" placeholder=\"Map1, Map2, Map3, etc.\">\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <hr class=\"autojoin\">\n" +
+    "\n" +
+    "    <div class=\"footer\">Toggle With \"PageUp\" Key</div>";
+
+
+gui.onclick = (e) => {
+
+    if (e.target.id === "crosshair") {
+        permCrosshair = e.target.checked;
+        settings.set('permCrosshair', permCrosshair);
     }
 
-    gui.id = "gui";
-
-    gui.innerHTML += "<style>\n" +
-        "        @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap');\n" +
-        "\n" +
-        "        #gui {\n" +
-        "            background-color: rgb(24, 25, 28);\n" +
-        "            border: solid rgb(24, 25, 28) 5px;\n" +
-        "            box-shadow: 0 0 8px 2px #000000;\n" +
-        "            position: absolute;\n" +
-        "            left: 200px;\n" +
-        "            top: 100px;\n" +
-        "            z-index: 300;\n" +
-        "            color: rgb(255, 255, 255);\n" +
-        "            padding: 6px;\n" +
-        "            font-family: \"Titillium Web\", serif;\n" +
-        "            line-height: 1.6;\n" +
-        "            border-radius: 3px\n" +
-        "        }\n" +
-        "\n" +
-        "        input:disabled {\n" +
-        "            background: rgb(255, 255, 255);\n" +
-        "            border: solid rgb(0, 0, 0) 1px;\n" +
-        "            width: 50px;\n" +
-        "        }\n" +
-        "\n" +
-        "        .heading {\n" +
-        "            width: 300px;\n" +
-        "            height: 40px;\n" +
-        "            display: flex;\n" +
-        "            justify-content: center;\n" +
-        "            align-items: center;\n" +
-        "            background-color: rgb(24, 25, 28);\n" +
-        "            margin: -9px -6px 8px;\n" +
-        "            font-family: \"Titillium Web\", serif;\n" +
-        "            font-weight: bold;\n" +
-        "            text-align: center;\n" +
-        "            font-size: 24px;\n" +
-        "            border-bottom: solid rgb(140, 140, 140) 2px;\n" +
-        "        }\n" +
-        "\n" +
-        "        .footer {\n" +
-        "            width: 300px;\n" +
-        "            height: 20px;\n" +
-        "            display: flex;\n" +
-        "            justify-content: center;\n" +
-        "            align-items: center;\n" +
-        "            background-color: rgb(24, 25, 28);\n" +
-        "            margin: 6px -6px -10px;\n" +
-        "            font-family: \"Titillium Web\", serif;\n" +
-        "            font-weight: bold;\n" +
-        "            text-align: center;\n" +
-        "            font-size: 11px;\n" +
-        "            position: relative;\n" +
-        "            border-top: solid rgb(140, 140, 140) 2px;\n" +
-        "        }\n" +
-        "\n" +
-        "        .module:hover {\n" +
-        "            background-color: rgb(0, 0, 0, 0.1)\n" +
-        "        }\n" +
-        "\n" +
-        "        .autojoin{\n" +
-        "            display: none;\n" +
-        "        }\n" +
-        "\n" +
-        "    </style>\n" +
-        "    <div id=\"infi\" class=\"heading\">Script Settings</div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"crosshair\" name=\"crosshair\">\n" +
-        "        <label for=\"crosshair\">Perm. Crosshair</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"customCSS\" name=\"customCSS\">\n" +
-        "        <label for=\"customCSS\">CSS Link: </label>\n" +
-        "        <input type=\"text\" id=\"cssLink\" placeholder=\"Paste CSS Link Here\">\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"hideweap\" name=\"hideweap\">\n" +
-        "        <label for=\"hideweap\">Hide Weapon ADS</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"arms\" name=\"arms\">\n" +
-        "        <label for=\"arms\">Hide Arms</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"highlight\" name=\"highlight\">\n" +
-        "        <label for=\"highlight\">Highlight Players</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"black\" name=\"black\">\n" +
-        "        <label for=\"black\">Black Players</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"wireframeWeapons\" name=\"wireframeWeapons\">\n" +
-        "        <label for=\"wireframeWeapons\">Wireframe Weapons</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"wireframeArms\" name=\"wireframeArms\">\n" +
-        "        <label for=\"wireframeArms\">Wireframe Arms</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"rainbow\" name=\"rainbow\">\n" +
-        "        <label for=\"rainbow\">Rainbow Colors</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        Inspect Key\n" +
-        "        <button id=\"bindButton\" style=\"width: 100px\">click to bind</button>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"adspower\" name=\"adspower\">\n" +
-        "        <label for=\"adspower\">0 ADS Power</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module\">\n" +
-        "        <input type=\"checkbox\" id=\"autoJoin\" name=\"autoJoin\">\n" +
-        "        <label for=\"autoJoin\">Auto-Joiner (Key F8)</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <hr class=\"autojoin\">\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"euLobbies\" name=\"euLobbies\">\n" +
-        "        <label for=\"euLobbies\">EU Lobbies</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"naLobbies\" name=\"naLobbies\">\n" +
-        "        <label for=\"naLobbies\">NA Lobbies</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"asiaLobbies\" name=\"asiaLobbies\">\n" +
-        "        <label for=\"asiaLobbies\">ASIA Lobbies</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"ffaLobbies\" name=\"ffaLobbies\">\n" +
-        "        <label for=\"ffaLobbies\">FFA Lobbies</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"tdmLobbies\" name=\"tdmLobbies\">\n" +
-        "        <label for=\"tdmLobbies\">TDM Lobbies</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"parkourLobbies\" name=\"parkourLobbies\">\n" +
-        "        <label for=\"parkourLobbies\">PARKOUR Lobbies</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <label for=\"preferredFilter\">Prefered Filter:</label>\n" +
-        "        <select id=\"preferredFilter\" name=\"preferredFilter\">\n" +
-        "            <option value=\"Time\">Time</option>\n" +
-        "            <option value=\"Players\">Players</option>\n" +
-        "        </select>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"range\" id=\"minPlayers\" name=\"minPlayers\" min=\"0\" max=\"8\" value=\"0\" step=\"1\">\n" +
-        "        <label id=\"minPlayersLab\" for=\"minPlayers\">min. Players</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"range\" id=\"maxPlayers\" name=\"maxPlayers\" min=\"0\" max=\"8\" value=\"0\" step=\"1\">\n" +
-        "        <label id=\"maxPlayersLab\" for=\"maxPlayers\">max. Players</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"range\" id=\"minTimeLeft\" name=\"minTimeLeft\" min=\"0\" max=\"8\" value=\"0\" step=\"1\">\n" +
-        "        <label id=\"minTimeLeftLab\" for=\"minTimeLeft\">min. Time Left</label>\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <div class=\"module autojoin\">\n" +
-        "        <input type=\"checkbox\" id=\"filterMaps\" name=\"filterMaps\">\n" +
-        "        <label for=\"filterMaps\">Map Filter: </label>\n" +
-        "        <input type=\"text\" id=\"mapFilterField\" placeholder=\"Map1, Map2, Map3, etc.\">\n" +
-        "    </div>\n" +
-        "\n" +
-        "    <hr class=\"autojoin\">\n" +
-        "\n" +
-        "    <div class=\"footer\">Toggle With \"PageUp\" Key</div>";
-
-
-    gui.onclick = (e) => {
-
-        if (e.target.id === "crosshair") {
-            permCrosshair = e.target.checked;
-            settings.set('permCrosshair', permCrosshair);
-        }
-
-        if (e.target.id === "customCSS") {
-            customCss = e.target.checked;
-            settings.set('customCss', customCss);
-        }
-
-        if (e.target.id === "hideweap") {
-            hideWeaponsAds = e.target.checked;
-            settings.set('hideWeaponsAds', hideWeaponsAds);
-        }
-
-        if (e.target.id === "arms") {
-            hideArms = e.target.checked;
-            settings.set('hideArms', hideArms);
-        }
-
-        if (e.target.id === "highlight") {
-            playerHighLight = e.target.checked;
-            settings.set('playerHighLight', playerHighLight);
-        }
-
-        if (e.target.id === "black") {
-            fullBlack = e.target.checked;
-            settings.set('fullBlack', fullBlack);
-        }
-
-        if (e.target.id === "wireframeWeapons") {
-            wireframeWeapons = e.target.checked;
-            settings.set('wireframeWeapons', wireframeWeapons);
-        }
-
-        if (e.target.id === "wireframeArms") {
-            wireframeArms = e.target.checked;
-            settings.set('wireframeArms', wireframeArms);
-        }
-
-        if (e.target.id === "rainbow") {
-            rainbow = e.target.checked;
-            settings.set('rainbow', rainbow);
-        }
-
-        if (e.target.id === "adspower") {
-            adspower = e.target.checked;
-            settings.set('adspower', adspower);
-        }
-
-        if (e.target.id === "autoJoin") {
-            autoJoin = e.target.checked;
-            settings.set('autoJoin', autoJoin);
-            for (let e of document.getElementsByClassName('autojoin')) {
-                e.style.display = autoJoin ? 'block' : 'none'
-            }
-        }
-
-        if (e.target.id === "euLobbies") {
-            euLobbies = e.target.checked;
-            settings.set('euLobbies', euLobbies);
-        }
-
-        if (e.target.id === "naLobbies") {
-            naLobbies = e.target.checked;
-            settings.set('naLobbies', naLobbies);
-        }
-
-        if (e.target.id === "asiaLobbies") {
-            asiaLobbies = e.target.checked;
-            settings.set('asiaLobbies', asiaLobbies);
-        }
-
-        if (e.target.id === "ffaLobbies") {
-            ffaLobbies = e.target.checked;
-            settings.set('ffaLobbies', ffaLobbies);
-        }
-
-        if (e.target.id === "tdmLobbies") {
-            tdmLobbies = e.target.checked;
-            settings.set('tdmLobbies', tdmLobbies);
-        }
-
-        if (e.target.id === "parkourLobbies") {
-            parkourLobbies = e.target.checked;
-            settings.set('parkourLobbies', parkourLobbies);
-        }
-
-        if (e.target.id === "filterMaps") {
-            filterMaps = e.target.checked;
-            settings.set('filterMaps', filterMaps);
-        }
-
-    };
-
-    gui.style.display = "none";
-
-    document.body.appendChild(gui);
-
-    if (settings.get('menuOpen') === undefined || settings.get('menuOpen')) {
-        toggleGui();
+    if (e.target.id === "customCSS") {
+        customCss = e.target.checked;
+        settings.set('customCss', customCss);
     }
 
-    document.getElementById("crosshair").checked = permCrosshair;
-    document.getElementById("customCSS").checked = customCss;
-    document.getElementById("hideweap").checked = hideWeaponsAds;
-    document.getElementById("arms").checked = hideArms;
-    document.getElementById("highlight").checked = playerHighLight;
-    document.getElementById("black").checked = fullBlack;
-    document.getElementById("wireframeWeapons").checked = wireframeWeapons;
-    document.getElementById("wireframeArms").checked = wireframeArms;
-    document.getElementById("rainbow").checked = rainbow;
-    document.getElementById("adspower").checked = adspower;
-
-    maxPlayersLab = document.getElementById('maxPlayersLab');
-    minPlayersLab = document.getElementById('minPlayersLab');
-    minTimeLeftLab = document.getElementById('minTimeLeftLab');
-
-    maxPlayerSlider = document.getElementById("maxPlayers");
-    minPlayerSlider = document.getElementById("minPlayers");
-    minTimeLeftSlider = document.getElementById("minTimeLeft");
-
-    maxPlayerSlider.onchange = () => {
-        settings.set('maxPlayers', Number.parseInt(maxPlayerSlider.value));
+    if (e.target.id === "hideweap") {
+        hideWeaponsAds = e.target.checked;
+        settings.set('hideWeaponsAds', hideWeaponsAds);
     }
 
-    minPlayerSlider.onchange = () => {
-        settings.set('minPlayers', Number.parseInt(minPlayerSlider.value));
+    if (e.target.id === "arms") {
+        hideArms = e.target.checked;
+        settings.set('hideArms', hideArms);
     }
 
-    minTimeLeftSlider.onchange = () => {
-        settings.set('minTimeLeft', Number.parseInt(minTimeLeftSlider.value));
+    if (e.target.id === "highlight") {
+        playerHighLight = e.target.checked;
+        settings.set('playerHighLight', playerHighLight);
     }
 
-    minPlayerSlider.value = minPlayers;
-    maxPlayerSlider.value = maxPlayers;
-    minTimeLeftSlider.value = minTimeLeft;
+    if (e.target.id === "black") {
+        fullBlack = e.target.checked;
+        settings.set('fullBlack', fullBlack);
+    }
 
-    if (autoJoin) {
+    if (e.target.id === "wireframeWeapons") {
+        wireframeWeapons = e.target.checked;
+        settings.set('wireframeWeapons', wireframeWeapons);
+    }
+
+    if (e.target.id === "wireframeArms") {
+        wireframeArms = e.target.checked;
+        settings.set('wireframeArms', wireframeArms);
+    }
+
+    if (e.target.id === "rainbow") {
+        rainbow = e.target.checked;
+        settings.set('rainbow', rainbow);
+    }
+
+    if (e.target.id === "adspower") {
+        adspower = e.target.checked;
+        settings.set('adspower', adspower);
+    }
+
+    if (e.target.id === "autoJoin") {
+        autoJoin = e.target.checked;
+        settings.set('autoJoin', autoJoin);
         for (let e of document.getElementsByClassName('autojoin')) {
             e.style.display = autoJoin ? 'block' : 'none'
         }
     }
 
-    document.getElementById("autoJoin").checked = autoJoin;
-    document.getElementById("euLobbies").checked = euLobbies;
-    document.getElementById("naLobbies").checked = naLobbies;
-    document.getElementById("asiaLobbies").checked = asiaLobbies;
-    document.getElementById("ffaLobbies").checked = ffaLobbies;
-    document.getElementById("tdmLobbies").checked = tdmLobbies;
-    document.getElementById("parkourLobbies").checked = parkourLobbies;
-
-    let button = document.getElementById("bindButton");
-    button.style.fontWeight = "800";
-    button.onclick = () => {
-        listening = true;
-        button.innerText = "Press a Key"
+    if (e.target.id === "euLobbies") {
+        euLobbies = e.target.checked;
+        settings.set('euLobbies', euLobbies);
     }
 
-    button.innerText = settings.get('inspectKey').toUpperCase();
-
-    let cssField = document.getElementById('cssLink');
-
-    if (settings.get('cssLink') === undefined) settings.set('cssLink', '');
-
-    cssField.value = settings.get('cssLink');
-
-    cssField.oninput = () => {
-        settings.set('cssLink', cssField.value);
+    if (e.target.id === "naLobbies") {
+        naLobbies = e.target.checked;
+        settings.set('naLobbies', naLobbies);
     }
 
-    let filter = document.getElementById("preferredFilter");
-
-    filter.value = preferredFilter;
-
-    filter.onchange = () => {
-        preferredFilter = filter.value;
-        settings.set('preferredFilter', filter.value);
+    if (e.target.id === "asiaLobbies") {
+        asiaLobbies = e.target.checked;
+        settings.set('asiaLobbies', asiaLobbies);
     }
 
-    document.getElementById("filterMaps").checked = filterMaps;
-
-    let mapField = document.getElementById("mapFilterField");
-
-    let mapString = "";
-    for (let name of maps) {
-        mapString += name + ", "
+    if (e.target.id === "ffaLobbies") {
+        ffaLobbies = e.target.checked;
+        settings.set('ffaLobbies', ffaLobbies);
     }
 
-    mapField.value = mapString.slice(0, -2);
-
-    mapField.oninput = () => {
-        maps = mapField.value.replaceAll(' ', '').toLowerCase().split(',');
-        settings.set('maps', maps);
+    if (e.target.id === "tdmLobbies") {
+        tdmLobbies = e.target.checked;
+        settings.set('tdmLobbies', tdmLobbies);
     }
 
-});
+    if (e.target.id === "parkourLobbies") {
+        parkourLobbies = e.target.checked;
+        settings.set('parkourLobbies', parkourLobbies);
+    }
+
+    if (e.target.id === "filterMaps") {
+        filterMaps = e.target.checked;
+        settings.set('filterMaps', filterMaps);
+    }
+
+};
+
+gui.style.display = "none";
+
+document.body.appendChild(gui);
+
+if (settings.get('menuOpen') === undefined || settings.get('menuOpen')) {
+    toggleGui();
+}
+
+document.getElementById("crosshair").checked = permCrosshair;
+document.getElementById("customCSS").checked = customCss;
+document.getElementById("hideweap").checked = hideWeaponsAds;
+document.getElementById("arms").checked = hideArms;
+document.getElementById("highlight").checked = playerHighLight;
+document.getElementById("black").checked = fullBlack;
+document.getElementById("wireframeWeapons").checked = wireframeWeapons;
+document.getElementById("wireframeArms").checked = wireframeArms;
+document.getElementById("rainbow").checked = rainbow;
+document.getElementById("adspower").checked = adspower;
+
+maxPlayersLab = document.getElementById('maxPlayersLab');
+minPlayersLab = document.getElementById('minPlayersLab');
+minTimeLeftLab = document.getElementById('minTimeLeftLab');
+
+maxPlayerSlider = document.getElementById("maxPlayers");
+minPlayerSlider = document.getElementById("minPlayers");
+minTimeLeftSlider = document.getElementById("minTimeLeft");
+
+maxPlayerSlider.onchange = () => {
+    settings.set('maxPlayers', Number.parseInt(maxPlayerSlider.value));
+}
+
+minPlayerSlider.onchange = () => {
+    settings.set('minPlayers', Number.parseInt(minPlayerSlider.value));
+}
+
+minTimeLeftSlider.onchange = () => {
+    settings.set('minTimeLeft', Number.parseInt(minTimeLeftSlider.value));
+}
+
+minPlayerSlider.value = minPlayers;
+maxPlayerSlider.value = maxPlayers;
+minTimeLeftSlider.value = minTimeLeft;
+
+if (autoJoin) {
+    for (let e of document.getElementsByClassName('autojoin')) {
+        e.style.display = autoJoin ? 'block' : 'none'
+    }
+}
+
+document.getElementById("autoJoin").checked = autoJoin;
+document.getElementById("euLobbies").checked = euLobbies;
+document.getElementById("naLobbies").checked = naLobbies;
+document.getElementById("asiaLobbies").checked = asiaLobbies;
+document.getElementById("ffaLobbies").checked = ffaLobbies;
+document.getElementById("tdmLobbies").checked = tdmLobbies;
+document.getElementById("parkourLobbies").checked = parkourLobbies;
+
+let button = document.getElementById("bindButton");
+button.style.fontWeight = "800";
+button.onclick = () => {
+    listening = true;
+    button.innerText = "Press a Key"
+}
+
+button.innerText = settings.get('inspectKey').toUpperCase();
+
+let cssField = document.getElementById('cssLink');
+
+if (settings.get('cssLink') === undefined) settings.set('cssLink', '');
+
+cssField.value = settings.get('cssLink');
+
+cssField.oninput = () => {
+    settings.set('cssLink', cssField.value);
+}
+
+let filter = document.getElementById("preferredFilter");
+
+filter.value = preferredFilter;
+
+filter.onchange = () => {
+    preferredFilter = filter.value;
+    settings.set('preferredFilter', filter.value);
+}
+
+document.getElementById("filterMaps").checked = filterMaps;
+
+let mapField = document.getElementById("mapFilterField");
+
+let mapString = "";
+for (let name of maps) {
+    mapString += name + ", "
+}
+
+mapField.value = mapString.slice(0, -2);
+
+mapField.oninput = () => {
+    maps = mapField.value.replaceAll(' ', '').toLowerCase().split(',');
+    settings.set('maps', maps);
+}
+
 
 window.addEventListener("mouseup", (e) => {
     if (e.button === 3 || e.button === 4)
@@ -921,16 +921,11 @@ animate();
 
 window.XMLHttpRequest = class extends window.XMLHttpRequest {
 
-    open(method, url) {
-        if (url === "https://api.kirka.io/api/inventory") this.invReq = true;
-        return super.open(...arguments);
-    }
-
     get responseText() {
         if (this.invReq) {
             this.invReq = false;
             let entries = JSON.parse(this.responseText);
-            let sortedItems = { legendary: [], epic: [], rare: [], common: [] };
+            let sortedItems = {legendary: [], epic: [], rare: [], common: []};
 
             for (let entry of entries) {
                 sortedItems[entry.item.rarity.toLowerCase()].push(entry);
@@ -945,6 +940,11 @@ window.XMLHttpRequest = class extends window.XMLHttpRequest {
         }
 
         return super.responseText;
+    }
+
+    open(method, url) {
+        if (url === "https://api.kirka.io/api/inventory") this.invReq = true;
+        return super.open(...arguments);
     }
 }
 
