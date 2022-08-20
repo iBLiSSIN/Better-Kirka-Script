@@ -15,6 +15,7 @@ if (!localStorage.saveSettings) localStorage.saveSettings = JSON.stringify({
     customCss: false,
     hideWeaponsAds: false,
     hideArms: false,
+    hideFlagAds: false,
     playerHighLight: false,
     fullBlack: false,
     wireframeWeapons: false,
@@ -47,6 +48,7 @@ let customCss = !!settings.get('customCss');
 //let hpNumber = true;
 let hideWeaponsAds = !!settings.get('hideWeaponsAds');
 let hideArms = !!settings.get('hideArms');
+let hideFlagAds = !!settings.get('hideFlagAds');
 let playerHighLight = !!settings.get('playerHighLight');
 let fullBlack = !!settings.get('fullBlack');
 let wireframeWeapons = !!settings.get('wireframeWeapons');
@@ -96,6 +98,7 @@ let minTimeLeftLab;
 let settingsButtonsAdded = false;
 
 let scene;
+let flagMaterial;
 
 WeakMap.prototype.set = new Proxy(WeakMap.prototype.set, {
     apply(target, thisArg, argArray) {
@@ -104,7 +107,16 @@ WeakMap.prototype.set = new Proxy(WeakMap.prototype.set, {
             scene = argArray[0];
         }
 
+        setTimeout(() => {
+            scene?.children?.forEach((e) => {
+                if (e.type === "Sprite" && !e.material.depthTest && e.material.map?.image?.width === 149) {
+                    flagMaterial = e.material;
+                }
+            })
+        }, 1000)
+
         return Reflect.apply(...arguments);
+
     }
 });
 
@@ -293,13 +305,13 @@ new MutationObserver(mutationRecords => {
         });
     } catch {
     }
-}).observe(document, {childList: true, subtree: true});
+}).observe(document, { childList: true, subtree: true });
 
 
 let oldLog = console.log;
 
 console.log = (...arguments) => {
-    if (typeof arguments[0] == "string" && arguments[0].includes("refresh") && arguments[0].includes("ad") && !arguments[0].includes("added")) {
+    if (typeof arguments[0] == "string" && arguments[0].startsWith("window.aiptag.cmd")) {
         throw "ad's blocked by overengineered ad block " + Math.random().toString().split(".")[1];
     }
     oldLog(...arguments);
@@ -400,6 +412,11 @@ gui.innerHTML += "<style>\n" +
     "    <div class=\"module\">\n" +
     "        <input type=\"checkbox\" id=\"arms\" name=\"arms\">\n" +
     "        <label for=\"arms\">Hide Arms</label>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"module\">\n" +
+    "        <input type=\"checkbox\" id=\"hideflag\" name=\"hideflag\">\n" +
+    "        <label for=\"hideflag\">Hide Flag ADS</label>\n" +
     "    </div>\n" +
     "\n" +
     "    <div class=\"module\">\n" +
@@ -530,6 +547,12 @@ gui.onclick = (e) => {
         settings.set('hideArms', hideArms);
     }
 
+    if (e.target.id === "hideflag") {
+        hideFlagAds = e.target.checked;
+        settings.set('hideFlagAds', hideFlagAds);
+    }
+
+
     if (e.target.id === "highlight") {
         playerHighLight = e.target.checked;
         settings.set('playerHighLight', playerHighLight);
@@ -617,6 +640,7 @@ document.getElementById("crosshair").checked = permCrosshair;
 document.getElementById("customCSS").checked = customCss;
 document.getElementById("hideweap").checked = hideWeaponsAds;
 document.getElementById("arms").checked = hideArms;
+document.getElementById("hideflag").checked = hideFlagAds;
 document.getElementById("highlight").checked = playerHighLight;
 document.getElementById("black").checked = fullBlack;
 document.getElementById("wireframeWeapons").checked = wireframeWeapons;
@@ -794,6 +818,14 @@ function animate() {
         }
     }
 
+    if (flagMaterial) {
+        if (hideFlagAds) {
+            flagMaterial.visible = !scoped;
+        } else {
+            flagMaterial.visible = true;
+        }
+    }
+
     if (crosshair && permCrosshair) crosshair.style = "visibility: visible !important; opacity: 1 !important; display: block !important;"
 
     try {
@@ -925,7 +957,7 @@ window.XMLHttpRequest = class extends window.XMLHttpRequest {
         if (this.invReq) {
             this.invReq = false;
             let entries = JSON.parse(this.responseText);
-            let sortedItems = {legendary: [], epic: [], rare: [], common: []};
+            let sortedItems = { legendary: [], epic: [], rare: [], common: [] };
 
             for (let entry of entries) {
                 sortedItems[entry.item.rarity.toLowerCase()].push(entry);
